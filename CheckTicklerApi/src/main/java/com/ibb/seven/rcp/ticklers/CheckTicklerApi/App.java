@@ -9,10 +9,14 @@ public class App
     {
     	System.getProperty("sun.locale.formatasdefault", "true");
         CheckTicklerApi checktickler = new CheckTicklerApi();
-        String tempDate = checktickler.check("asdafa asfascas **08-07-2014 ASd", null);
-        String newDateStr = checktickler.check("asdafa asfascas **10-17-2015", tempDate);
-        System.out.println("HIER IS IN APP de nieuwe datetime: " + newDateStr);
+        String tempDate = checktickler.check("hallo **1d", null);
+        System.out.println("TEST: " + tempDate);
+        String newDateStr = checktickler.check("asdafa asfascas **1d ", tempDate);
+        System.out.println("HIER IS IN APP de nieuwe datetime in string: " + newDateStr);
+        if(newDateStr != null)
+        {
         DateTime ticklerDateTime = checktickler.toDate(newDateStr);
         System.out.println("HIER IS IN APP de nieuwe datetime: " + ticklerDateTime);
+        }
     }
 }

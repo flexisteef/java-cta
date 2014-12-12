@@ -1,6 +1,7 @@
 package com.ibb.seven.rcp.ticklers.CheckTicklerApi;
 
 import java.util.Scanner;
+
 import com.ibb.seven.rcp.ticklers.TicklerScanApi.*;
 
 import org.joda.time.DateTime;
@@ -8,15 +9,20 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.eclipse.jface.dialogs.MessageDialog;
 //import java.awt.*; 
 //import javax.swing.*;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.swt.widgets.Shell;
+
 
 
 
 public class CheckTicklerApi
 	{
 		private String	RegexTickler		= "\\*\\*(([0-99])+([dD]|[wW]|[mM]|[yY])(([0-99]){1,}([wW]|[mM]|[yY]))?(([0-99]){1,}([mM]|[yY]))?(([0-99]){1,}[yY])?)";
-		private String	RegexAbsoluteDate	= "(\\*\\*[0-99]{1,}([-]|[\\/])[0-99]{1,}([-]|[\\/])\\d{4})";
+		private String	RegexAbsoluteDate	= "(\\*\\*[0-99]{1,}([-]|[\\/])[0-99]{1,}([-]|[\\/])\\d{2,4})";
 		private String	TicklerScanned, AbsoluteDateStr = null;
 		
 		private DateTime	newDate;
@@ -34,8 +40,24 @@ public class CheckTicklerApi
 							{
 								logger.info("Do you want to change the ticklerdate?\n");
 								
-								newDate = updateTickler.getTicklerDate(note);
+								Shell shell = new Shell();
 								// ask user to change tickler date.
+								MessageDialog dialog = new MessageDialog(shell, "Warning!", null,
+									    "Do you want to change the ticklerdate?", MessageDialog.QUESTION, new String[] { "Yes",
+									  "No"}, 0);
+									int result = dialog.open();
+									System.out.println(result); 
+								if(result == 0)
+								{
+								newDate = updateTickler.getTicklerDate(note);
+								}
+								else
+								{
+									newDate = updateTickler.getTicklerDate("**0d");	
+								}
+							
+							
+								
 							}
 						else
 							{
@@ -48,13 +70,21 @@ public class CheckTicklerApi
 								logger.info("Changed the absolutedate\n");
 								newDate =  updateTickler.getTicklerDate(note);
 							}
-						return newDate.toString("dd-MM-yyyy");
+						return newDate.toString("dd-MM-yyyy"); 
 					}
 				else
 					{
 						scanNote(note);
 					}
-				return (dateStr != null) ? newDate.toString("dd-MM-yyyy") : getAbsoluteDateStr(); 
+				if(getAbsoluteDateStr() != null)
+					{
+				return (dateStr != null) ? newDate.toString("dd-MM-yyyy") : getAbsoluteDateStr();
+					}
+				else 
+					{
+						return (dateStr != null) ? newDate.toString("dd-MM-yyyy") : getTicklerScanned();		
+					}
+				
 			}
 		private void scanNote(String Note)
 			{
@@ -78,7 +108,7 @@ public class CheckTicklerApi
 										result = currentLine;
 									}
 							}
-						i++;
+						
 						sc.close();
 						if (result != null)
 							{
@@ -95,13 +125,24 @@ public class CheckTicklerApi
 										result = null;
 									}
 							}
+						i++;
 					}		
 			}
 		public DateTime toDate(String date)
 			{
+			if(date != null)
+			{
+			if(date.matches(RegexTickler))
+			{
+				TicklerScanApi updateTickler = new TicklerScanApi();
+				DateTime alternativeDate = updateTickler.getTicklerDate(date); 
+				return alternativeDate;
+			}
 				DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
 				DateTime ticklerDateTime = formatter.parseDateTime(date);		
 				return ticklerDateTime;
+			}
+			return null;
 			}
 
 		public String getAbsoluteDateStr()
